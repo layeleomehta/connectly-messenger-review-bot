@@ -12,6 +12,11 @@ spring:
     enabled: true
     baseline-on-migrate: true
 
+connectly:
+  messenger-platform:
+    webhook:
+      verify-token: connectly-coding-challenge
+
 server:
   error:
     include-message: always
