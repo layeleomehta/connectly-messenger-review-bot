@@ -11,6 +11,10 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+  security:
+    crypto:
+      secret-key: connectly-secret-key
+      salt: a3f8f1d44e22104e
 
 connectly:
   messenger-platform:
