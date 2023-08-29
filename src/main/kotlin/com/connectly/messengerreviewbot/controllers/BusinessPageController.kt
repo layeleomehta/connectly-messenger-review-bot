@@ -15,7 +15,11 @@ class BusinessPageController(
 
     @PostMapping
     fun registerBusinessPage(body: RegisterBusinessPageBody): ResponseEntity<Any> {
-
+        businessPageService.registerBusinessPage(
+            businessName = body.businessName,
+            pageAccessToken = body.pageAccessToken,
+            pageId = body.pageId
+        )
         return ResponseEntity.ok().build()
     }
 

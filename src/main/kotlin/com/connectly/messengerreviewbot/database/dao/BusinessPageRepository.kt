@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface BusinessPageRepository: JpaRepository<BusinessPage, Long> {
+    fun findByPageId(pageId: String): BusinessPage?
 }
