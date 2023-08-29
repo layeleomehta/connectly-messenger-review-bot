@@ -16,6 +16,8 @@ connectly:
   messenger-platform:
     webhook:
       verify-token: connectly-coding-challenge
+  meta-for-developers:
+    app-id: 820451813151477
 
 server:
   error:
