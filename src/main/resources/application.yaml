@@ -1,1 +1,18 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/messenger_review_bot
+    username: postgres
+    password:
+  cloud:
+    gcp:
+      sql:
+        database-name: messenger_review_bot
+        enabled: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
 
+server:
+  error:
+    include-message: always
+  port: 8080
