@@ -21,7 +21,8 @@ data class Messaging(
     val timestamp: Instant,
     val message: IncomingTextMessage?,
     @JsonProperty("messaging_feedback")
-    val messagingFeedback: IncomingCustomerFeedbackMessage?
+    val messagingFeedback: IncomingCustomerFeedbackMessage?,
+    val postback: IncomingMessagePostback?
 )
 
 data class Sender(

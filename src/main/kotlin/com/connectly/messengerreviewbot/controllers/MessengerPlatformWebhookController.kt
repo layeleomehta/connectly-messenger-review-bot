@@ -23,13 +23,16 @@ class MessengerPlatformWebhookController(
 
     @PostMapping
     fun receiveMessengerPlatformWebhookEvent(@RequestBody body: IncomingMessageEvent): ResponseEntity<Any> {
+        print(body)
         body.entry.forEach { entry ->
             entry.messaging.forEach { messaging ->
                 if(messaging.message != null) {
+                    // process an incoming text message
                     println("this is a text message")
                 }
 
                 if(messaging.messagingFeedback != null) {
+                    // process and save a customer's review
                     // obtain the business page by recipient id (business's page id)
                     val businessPageId = messaging.recipient.id
                     businessPageService.getBusinessPageByPageId(businessPageId)?.let { businessPage ->
@@ -40,10 +43,13 @@ class MessengerPlatformWebhookController(
                         customerFeedbackReviewService.createCustomerFeedbackReview(businessPage, reviewText, starRating)
                     } ?: throw Exception("Unable to find this business page by the business page id")
                 }
+
+                if(messaging.postback != null) {
+                    // process a message postback and prompt for a review:
+                }
             }
         }
 
-        println(body)
         return ResponseEntity.ok().build()
     }
 
