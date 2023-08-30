@@ -1,6 +1,8 @@
 package com.connectly.messengerreviewbot.controllers
 
 import com.connectly.messengerreviewbot.controllers.models.IncomingMessageEvent
+import com.connectly.messengerreviewbot.services.BusinessPageService
+import com.connectly.messengerreviewbot.services.CustomerFeedbackReviewService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -14,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam
 @RequestMapping("/api/v1/messenger-platform-webhook")
 class MessengerPlatformWebhookController(
     @Value("\${connectly.messenger-platform.webhook.verify-token}")
-    private val messengerPlatformWebhookVerifyToken: String
+    private val messengerPlatformWebhookVerifyToken: String,
+    private val businessPageService: BusinessPageService,
+    private val customerFeedbackReviewService: CustomerFeedbackReviewService
 ) {
 
     @PostMapping
@@ -26,7 +30,15 @@ class MessengerPlatformWebhookController(
                 }
 
                 if(messaging.messagingFeedback != null) {
-                    println("this is a customer feedback review")
+                    // obtain the business page by recipient id (business's page id)
+                    val businessPageId = messaging.recipient.id
+                    businessPageService.getBusinessPageByPageId(businessPageId)?.let { businessPage ->
+                        // save the review
+                        val starRating = messaging.messagingFeedback.feedbackScreens.first().questions.get(key = "hauydmns8")?.payload!!.toInt()
+                        val reviewText = messaging.messagingFeedback.feedbackScreens.first().questions.get(key = "hauydmns8")?.followUp?.payload
+
+                        customerFeedbackReviewService.createCustomerFeedbackReview(businessPage, reviewText, starRating)
+                    } ?: throw Exception("Unable to find this business page by the business page id")
                 }
             }
         }

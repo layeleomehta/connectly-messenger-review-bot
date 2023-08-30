@@ -29,7 +29,7 @@ class BusinessPageService(
         )
     }
 
-    private fun getBusinessPageByPageId(pageId: String): BusinessPage? {
+    fun getBusinessPageByPageId(pageId: String): BusinessPage? {
         return businessPageRepository.findByPageId(pageId)
     }
 
