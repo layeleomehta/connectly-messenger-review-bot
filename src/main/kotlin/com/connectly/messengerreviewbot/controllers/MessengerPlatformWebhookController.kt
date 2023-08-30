@@ -21,6 +21,10 @@ class MessengerPlatformWebhookController(
     private val messengerPlatformWebhookVerifyToken: String,
     @Value("\${connectly.messenger-platform.send-api.review-question-id}")
     private val messengerPlatformReviewQuestionId: String,
+    @Value("\${connectly.messenger-platform.send-api.postback.get-started-payload}")
+    private val messengerPlatformPostbackGetStartedPayload: String,
+    @Value("\${connectly.messenger-platform.send-api.postback.persistent-menu-payload}")
+    private val messengerPlatformPostbackPersistentMenuPayload: String,
     private val businessPageService: BusinessPageService,
     private val customerFeedbackReviewService: CustomerFeedbackReviewService,
     private val messengerPlatformMessagingService: MessengerPlatformMessagingService
@@ -53,7 +57,9 @@ class MessengerPlatformWebhookController(
 
                 if(messaging.postback != null) {
                     // process a message postback and request for a customer feedback review:
-                    if(messaging.postback.payload == "PERSISTENT_MENU_REVIEW" || messaging.postback.payload == "GET_STARTED_REVIEW") {
+                    if(messaging.postback.payload == messengerPlatformPostbackPersistentMenuPayload
+                        || messaging.postback.payload == messengerPlatformPostbackGetStartedPayload
+                    ) {
                         messengerPlatformMessagingService.sendCustomerFeedbackMessage(
                             recipientPsid = messaging.sender.id,
                             businessPage = businessPage

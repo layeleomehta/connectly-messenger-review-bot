@@ -17,18 +17,6 @@ class BusinessPageController(
     private val businessPageService: BusinessPageService,
     private val messengerPlatformMessagingService: MessengerPlatformMessagingService
 ) {
-    // TODO: test controller; please delete
-    @GetMapping
-    fun hi(): ResponseEntity<Any> {
-        businessPageService.getBusinessPageByPageId("112810605251603")?.let {
-            messengerPlatformMessagingService.sendCustomerFeedbackMessage(
-                recipientPsid= "6456535891062838", businessPage = it
-            )
-        }
-
-        return ResponseEntity.ok().build()
-    }
-
     @PostMapping
     fun registerBusinessPage(@RequestBody body: RegisterBusinessPageBody): ResponseEntity<Any> {
         businessPageService.registerBusinessPage(
