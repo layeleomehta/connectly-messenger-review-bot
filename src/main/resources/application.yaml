@@ -24,6 +24,12 @@ connectly:
       base-url: https://graph.facebook.com
       version: v17.0
       review-question-id: 7b46c20a8c1e475f8f5f2f98408e2a75
+      postback:
+        persistent-menu-payload: PERSISTENT_MENU_REVIEW
+        quick-replies-payload: QUICK_REPLIES_REVIEW
+        get-started-payload: GET_STARTED_REVIEW
+    messenger-profile-api:
+      base-url: https://graph.facebook.com/v2.6/me
     meta-for-developers:
       app-id: 820451813151477
 
