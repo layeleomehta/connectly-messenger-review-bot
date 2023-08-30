@@ -19,9 +19,9 @@ data class Messaging(
     val sender: Sender,
     val recipient: Recipient,
     val timestamp: Instant,
-    val message: Message?,
+    val message: IncomingTextMessage?,
     @JsonProperty("messaging_feedback")
-    val messagingFeedback: MessagingFeedback?
+    val messagingFeedback: IncomingCustomerFeedbackMessage?
 )
 
 data class Sender(
@@ -31,31 +31,3 @@ data class Sender(
 data class Recipient(
     val id: String
 )
-
-data class Message(
-    val mid: String,
-    val text: String
-)
-
-data class MessagingFeedback(
-    @JsonProperty("feedback_screens")
-    val feedbackScreens: List<FeedbackScreen>
-)
-
-data class FeedbackScreen(
-    val screenId: Int,
-    val questions: Map<String, QuestionDetails>
-)
-
-data class QuestionDetails(
-    val type: String,
-    val payload: String,
-    @JsonProperty("follow_up")
-    val followUp: FollowUp
-)
-
-data class FollowUp(
-    val type: String,
-    val payload: String
-)
-
