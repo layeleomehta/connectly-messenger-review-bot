@@ -11,5 +11,9 @@ class MessengerPlatformMessagingService(
     private val messengerPlatformSendApiVersion: String
     ) {
 
+    fun sendCustomerFeedbackMessage() {
+
+    }
+
 
 }
