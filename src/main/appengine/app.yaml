@@ -5,7 +5,7 @@ instance_class: F2
 env_variables:
   SPRING_DATASOURCE_USERNAME: 'postgres'
   SPRING_DATASOURCE_PASSWORD: 'password'
-  SPRING_DATASOURCE_URL: 'jdbc:postgresql://google/connectly?cloudSqlInstance=connectly-397506:us-central1:connectly&socketFactory=com.google.cloud.sql.postgres.SocketFactory'
+  SPRING_DATASOURCE_URL: 'jdbc:postgresql://google/messenger_review_bot?cloudSqlInstance=connectly-397506:us-central1:connectly&socketFactory=com.google.cloud.sql.postgres.SocketFactory'
   SPRING_CLOUD_GCP_SQL_ENABLED: true
   SPRING_CLOUD_GCP_SQL_INSTANCECONNECTIONNAME: connectly-397506:us-central1:connectly
   SERVER_PORT: 8080
