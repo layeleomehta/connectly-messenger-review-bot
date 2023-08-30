@@ -35,12 +35,12 @@ repositories {
 
 dependencies {
 	implementation("org.springframework.security:spring-security-crypto:6.0.2")
+	implementation("com.google.cloud.sql:postgres-socket-factory:1.11.0")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.flywaydb:flyway-core")
 	runtimeOnly("org.postgresql:postgresql")
-	implementation("com.google.cloud.sql:postgres-socket-factory")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
@@ -51,14 +51,14 @@ configure<com.google.cloud.tools.gradle.appengine.appyaml.AppEngineAppYamlExtens
 	}
 
 	deploy {
-		setProjectId("connectly-397506")
-		setVersion("GCLOUD_CONFIG")
+		projectId = "connectly-397506"
+		version = "GCLOUD_CONFIG"
 	}
 }
 
 tasks.withType<KotlinCompile> {
 	kotlinOptions {
-		freeCompilerArgs += "-Xjsr305=strict"
+		freeCompilerArgs = listOf("-Xjsr305=strict")
 		jvmTarget = "17"
 	}
 }
