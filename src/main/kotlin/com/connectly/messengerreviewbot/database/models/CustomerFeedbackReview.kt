@@ -16,7 +16,7 @@ data class CustomerFeedbackReview(
     @JoinColumn(name = "business_page_id")
     var businessPage: BusinessPage,
 
-    var reviewText: String,
+    var reviewText: String?,
     var starRating: Int
 ) {
     override fun equals(other: Any?): Boolean {
