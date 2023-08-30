@@ -25,7 +25,6 @@ class MessengerPlatformWebhookController(
 
     @PostMapping
     fun receiveMessengerPlatformWebhookEvent(@RequestBody body: IncomingMessageEvent): ResponseEntity<Any> {
-        print(body)
         body.entry.forEach { entry ->
             entry.messaging.forEach { messaging ->
                 if(messaging.message != null) {

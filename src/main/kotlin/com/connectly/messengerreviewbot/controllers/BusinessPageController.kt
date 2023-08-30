@@ -20,9 +20,12 @@ class BusinessPageController(
     // TODO: test controller; please delete
     @GetMapping
     fun hi(): ResponseEntity<Any> {
-        messengerPlatformMessagingService.sendCustomerFeedbackMessage(
-            recipientPsid= "6456535891062838", businessName= "Laye's Confectionary", pageId= "112810605251603"
-        )
+        businessPageService.getBusinessPageByPageId("112810605251603")?.let {
+            messengerPlatformMessagingService.sendCustomerFeedbackMessage(
+                recipientPsid= "6456535891062838", businessPage = it
+            )
+        }
+
         return ResponseEntity.ok().build()
     }
 

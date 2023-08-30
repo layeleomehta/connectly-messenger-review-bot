@@ -1,11 +1,13 @@
 package com.connectly.messengerreviewbot.services
 
+import com.connectly.messengerreviewbot.database.models.BusinessPage
 import com.connectly.messengerreviewbot.services.models.*
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
+import org.springframework.security.crypto.encrypt.TextEncryptor
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.ResourceAccessException
@@ -19,11 +21,11 @@ class MessengerPlatformMessagingService(
     @Value("\${connectly.messenger-platform.send-api.version}")
     private val messengerPlatformSendApiVersion: String,
     @Value("\${connectly.messenger-platform.send-api.review-question-id}")
-    private val messengerPlatformReviewQuestionId: String
-
+    private val messengerPlatformReviewQuestionId: String,
+    private val textEncryptor: TextEncryptor
 ) {
 
-    fun sendCustomerFeedbackMessage(recipientPsid: String, businessName: String, pageId: String): MessageCreationResponse? {
+    fun sendCustomerFeedbackMessage(recipientPsid: String, businessPage: BusinessPage): MessageCreationResponse? {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
 
@@ -34,8 +36,8 @@ class MessengerPlatformMessagingService(
                     "type" to "template",
                     "payload" to mapOf(
                         "template_type" to "customer_feedback",
-                        "title" to "Rate your experience with $businessName.",
-                        "subtitle" to "Let $businessName know how they are doing by answering two questions",
+                        "title" to "Rate your experience with ${businessPage.businessName}.",
+                        "subtitle" to "Let ${businessPage.businessName} know how they are doing by answering two questions",
                         "button_title" to "Rate Experience",
                         "feedback_screens" to listOf(
                             mapOf(
@@ -43,7 +45,7 @@ class MessengerPlatformMessagingService(
                                     mapOf(
                                         "id" to messengerPlatformReviewQuestionId,
                                         "type" to "csat",
-                                        "title" to "How would you rate your experience with $businessName",
+                                        "title" to "How would you rate your experience with ${businessPage.businessName}",
                                         "score_label" to "neg_pos",
                                         "score_option" to "five_stars",
                                         "follow_up" to mapOf(
@@ -65,7 +67,7 @@ class MessengerPlatformMessagingService(
 
         return try {
             restTemplate.exchange(
-                "$messengerPlatformSendApiBaseUrl/$messengerPlatformSendApiVersion/$pageId/messages?access_token=EAALqMlLg0vUBO2LkyzcMpDaV9sZBZBylK1ZBb4s9Jdngq5OXZAhhvGYZC11G8MvKPIEmxEDjBCgOxiYzZBO3aNcP9QGKSfL3VITjFP7NFOVpYFnZAVyX8vCrf7iagx5heLbTf14pVEz2o5AYqrwgjWrG7tZCx7ZBBBR9gyM0rcIr1fJYQWqB4SAKBMkDdHRZAH3BCo",
+                "$messengerPlatformSendApiBaseUrl/$messengerPlatformSendApiVersion/${businessPage.pageId}/messages?access_token=${textEncryptor.decrypt(businessPage.hashedPageAccessToken)}",
                 HttpMethod.POST,
                 requestEntity,
                 MessageCreationResponse::class.java
