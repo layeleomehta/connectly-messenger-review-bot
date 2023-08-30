@@ -20,19 +20,19 @@ class MessengerPlatformMessagingService(
     private val messengerPlatformSendApiVersion: String
     ) {
 
-    fun sendCustomerFeedbackMessage() {
+    fun sendCustomerFeedbackMessage(recipientPsid: String, businessName: String, pageId: String): MessageCreationResponse? {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
 
         val requestBody = mapOf(
-            "recipient" to mapOf("id" to "6456535891062838"),
+            "recipient" to mapOf("id" to recipientPsid),
             "message" to mapOf(
                 "attachment" to mapOf(
                     "type" to "template",
                     "payload" to mapOf(
                         "template_type" to "customer_feedback",
-                        "title" to "Rate your experience with Original Coast Clothing.",
-                        "subtitle" to "Let Original Coast Clothing know how they are doing by answering two questions",
+                        "title" to "Rate your experience with $businessName.",
+                        "subtitle" to "Let $businessName know how they are doing by answering two questions",
                         "button_title" to "Rate Experience",
                         "feedback_screens" to listOf(
                             mapOf(
@@ -40,7 +40,7 @@ class MessengerPlatformMessagingService(
                                     mapOf(
                                         "id" to "hauydmns8",
                                         "type" to "csat",
-                                        "title" to "How would you rate your experience with Original Coast Clothing?",
+                                        "title" to "How would you rate your experience with $businessName",
                                         "score_label" to "neg_pos",
                                         "score_option" to "five_stars",
                                         "follow_up" to mapOf(
@@ -60,10 +60,9 @@ class MessengerPlatformMessagingService(
 
         val requestEntity = HttpEntity(requestBody, headers)
 
-
-        try {
+        return try {
             restTemplate.exchange(
-                "https://graph.facebook.com/v17.0/112810605251603/messages?access_token=EAALqMlLg0vUBO2LkyzcMpDaV9sZBZBylK1ZBb4s9Jdngq5OXZAhhvGYZC11G8MvKPIEmxEDjBCgOxiYzZBO3aNcP9QGKSfL3VITjFP7NFOVpYFnZAVyX8vCrf7iagx5heLbTf14pVEz2o5AYqrwgjWrG7tZCx7ZBBBR9gyM0rcIr1fJYQWqB4SAKBMkDdHRZAH3BCo",
+                "$messengerPlatformSendApiBaseUrl/$messengerPlatformSendApiVersion/$pageId/messages?access_token=EAALqMlLg0vUBO2LkyzcMpDaV9sZBZBylK1ZBb4s9Jdngq5OXZAhhvGYZC11G8MvKPIEmxEDjBCgOxiYzZBO3aNcP9QGKSfL3VITjFP7NFOVpYFnZAVyX8vCrf7iagx5heLbTf14pVEz2o5AYqrwgjWrG7tZCx7ZBBBR9gyM0rcIr1fJYQWqB4SAKBMkDdHRZAH3BCo",
                 HttpMethod.POST,
                 requestEntity,
                 MessageCreationResponse::class.java
@@ -75,6 +74,5 @@ class MessengerPlatformMessagingService(
         }
 
     }
-
 
 }
