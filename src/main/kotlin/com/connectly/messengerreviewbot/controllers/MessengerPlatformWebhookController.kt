@@ -19,6 +19,18 @@ class MessengerPlatformWebhookController(
 
     @PostMapping
     fun receiveMessengerPlatformWebhookEvent(@RequestBody body: IncomingMessageEvent): ResponseEntity<Any> {
+        body.entry.forEach { entry ->
+            entry.messaging.forEach { messaging ->
+                if(messaging.message != null) {
+                    println("this is a text message")
+                }
+
+                if(messaging.messagingFeedback != null) {
+                    println("this is a customer feedback review")
+                }
+            }
+        }
+
         println(body)
         return ResponseEntity.ok().build()
     }
