@@ -25,6 +25,8 @@ class MessengerPlatformWebhookController(
     private val messengerPlatformPostbackGetStartedPayload: String,
     @Value("\${connectly.messenger-platform.send-api.postback.persistent-menu-payload}")
     private val messengerPlatformPostbackPersistentMenuPayload: String,
+    @Value("\${connectly.messenger-platform.send-api.postback.quick-replies-payload}")
+    private val messengerPlatformPostbackQuickRepliesPayload: String,
     private val businessPageService: BusinessPageService,
     private val customerFeedbackReviewService: CustomerFeedbackReviewService,
     private val messengerPlatformMessagingService: MessengerPlatformMessagingService
@@ -41,8 +43,20 @@ class MessengerPlatformWebhookController(
                     ?: throw Exception("Unable to find this business page by the business page id")
 
                 if(messaging.message != null) {
-                    // process an incoming text message
-                    println("this is a text message")
+                    // process an incoming text message. If it's a quick replies payload, request customer review.
+                    if(messaging.message.quickReply != null && messaging.message.quickReply.payload == messengerPlatformPostbackQuickRepliesPayload) {
+                        // this is a quick reply; respond by requesting a customer review
+                        messengerPlatformMessagingService.sendCustomerFeedbackMessage(
+                            recipientPsid = messaging.sender.id,
+                            businessPage = businessPage
+                        )
+                    } else {
+                        // this is a normal text message; respond by requesting a quick reply
+                        messengerPlatformMessagingService.sendQuickReplyMessage(
+                            recipientPsid = messaging.sender.id,
+                            businessPage = businessPage
+                        )
+                    }
                 }
 
                 if(messaging.messagingFeedback != null) {

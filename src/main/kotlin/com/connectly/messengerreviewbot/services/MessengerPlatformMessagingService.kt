@@ -22,6 +22,8 @@ class MessengerPlatformMessagingService(
     private val messengerPlatformSendApiVersion: String,
     @Value("\${connectly.messenger-platform.send-api.review-question-id}")
     private val messengerPlatformReviewQuestionId: String,
+    @Value("\${connectly.messenger-platform.send-api.postback.quick-replies-payload}")
+    private val messengerPlatformPostbackQuickRepliesPayload: String,
     private val textEncryptor: TextEncryptor
 ) {
 
@@ -65,6 +67,40 @@ class MessengerPlatformMessagingService(
 
         val requestEntity = HttpEntity(requestBody, headers)
 
+        return try {
+            restTemplate.exchange(
+                "$messengerPlatformSendApiBaseUrl/$messengerPlatformSendApiVersion/${businessPage.pageId}/messages?access_token=${textEncryptor.decrypt(businessPage.hashedPageAccessToken)}",
+                HttpMethod.POST,
+                requestEntity,
+                MessageCreationResponse::class.java
+            ).body ?: throw Exception("Cannot create message due to an unknown error")
+        } catch (e: ResourceAccessException) {
+            throw Exception("Error connecting to Send API")
+        } catch (e: HttpClientErrorException) {
+            throw Exception("Cannot create message due to invalid inputs")
+        }
+    }
+
+    fun sendQuickReplyMessage(recipientPsid: String, businessPage: BusinessPage): MessageCreationResponse? {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        val requestBody = mapOf(
+            "recipient" to mapOf("id" to recipientPsid),
+            "messaging_type" to "RESPONSE",
+            "message" to mapOf(
+                "text" to "Sorry, I didn't quite understand that! Would you like to leave us a review?",
+                "quick_replies" to listOf(
+                    mapOf(
+                        "content_type" to "text",
+                        "title" to "Yes",
+                        "payload" to messengerPlatformPostbackQuickRepliesPayload
+                    )
+                )
+            )
+        )
+
+        val requestEntity = HttpEntity(requestBody, headers)
         return try {
             restTemplate.exchange(
                 "$messengerPlatformSendApiBaseUrl/$messengerPlatformSendApiVersion/${businessPage.pageId}/messages?access_token=${textEncryptor.decrypt(businessPage.hashedPageAccessToken)}",
