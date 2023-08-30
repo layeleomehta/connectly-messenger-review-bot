@@ -20,8 +20,11 @@ connectly:
   messenger-platform:
     webhook:
       verify-token: connectly-coding-challenge
-  meta-for-developers:
-    app-id: 820451813151477
+    send-api:
+      base-url: https://graph.facebook.com
+      version: v17.0
+    meta-for-developers:
+      app-id: 820451813151477
 
 server:
   error:
