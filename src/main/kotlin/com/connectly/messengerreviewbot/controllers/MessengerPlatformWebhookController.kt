@@ -3,6 +3,7 @@ package com.connectly.messengerreviewbot.controllers
 import com.connectly.messengerreviewbot.controllers.models.IncomingMessageEvent
 import com.connectly.messengerreviewbot.services.BusinessPageService
 import com.connectly.messengerreviewbot.services.CustomerFeedbackReviewService
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -22,11 +23,17 @@ class MessengerPlatformWebhookController(
     private val businessPageService: BusinessPageService,
     private val customerFeedbackReviewService: CustomerFeedbackReviewService
 ) {
+    private val logger = LoggerFactory.getLogger(MessengerPlatformWebhookController::class.java)
 
     @PostMapping
     fun receiveMessengerPlatformWebhookEvent(@RequestBody body: IncomingMessageEvent): ResponseEntity<Any> {
         body.entry.forEach { entry ->
             entry.messaging.forEach { messaging ->
+                // obtain the business page by recipient id (business's page id)
+                val businessPageId = messaging.recipient.id
+                val businessPage = businessPageService.getBusinessPageByPageId(businessPageId)
+                    ?: throw Exception("Unable to find this business page by the business page id")
+
                 if(messaging.message != null) {
                     // process an incoming text message
                     println("this is a text message")
@@ -34,15 +41,12 @@ class MessengerPlatformWebhookController(
 
                 if(messaging.messagingFeedback != null) {
                     // process and save a customer's review
-                    // obtain the business page by recipient id (business's page id)
-                    val businessPageId = messaging.recipient.id
-                    businessPageService.getBusinessPageByPageId(businessPageId)?.let { businessPage ->
-                        // save the review
-                        val starRating = messaging.messagingFeedback.feedbackScreens.first().questions.get(key = messengerPlatformReviewQuestionId)?.payload!!.toInt()
-                        val reviewText = messaging.messagingFeedback.feedbackScreens.first().questions.get(key = messengerPlatformReviewQuestionId)?.followUp?.payload
+                    val starRating = messaging.messagingFeedback.feedbackScreens.first().questions.get(key = messengerPlatformReviewQuestionId)?.payload!!.toInt()
+                    val reviewText = messaging.messagingFeedback.feedbackScreens.first().questions.get(key = messengerPlatformReviewQuestionId)?.followUp?.payload
 
-                        customerFeedbackReviewService.createCustomerFeedbackReview(businessPage, reviewText, starRating)
-                    } ?: throw Exception("Unable to find this business page by the business page id")
+                    customerFeedbackReviewService.createCustomerFeedbackReview(businessPage, reviewText, starRating).let {
+                        logger.debug("successfully saved customer review into the CustomerFeedbackReview table.")
+                    }
                 }
 
                 if(messaging.postback != null) {

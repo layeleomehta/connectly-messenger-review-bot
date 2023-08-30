@@ -77,7 +77,6 @@ class MessengerPlatformMessagingService(
         } catch (e: HttpClientErrorException) {
             throw Exception("Cannot create message due to invalid inputs")
         }
-
     }
 
 }
