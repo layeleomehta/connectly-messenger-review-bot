@@ -17,8 +17,11 @@ class MessengerPlatformMessagingService(
     @Value("\${connectly.messenger-platform.send-api.base-url}")
     private val messengerPlatformSendApiBaseUrl: String,
     @Value("\${connectly.messenger-platform.send-api.version}")
-    private val messengerPlatformSendApiVersion: String
-    ) {
+    private val messengerPlatformSendApiVersion: String,
+    @Value("\${connectly.messenger-platform.send-api.review-question-id}")
+    private val messengerPlatformReviewQuestionId: String
+
+) {
 
     fun sendCustomerFeedbackMessage(recipientPsid: String, businessName: String, pageId: String): MessageCreationResponse? {
         val headers = HttpHeaders()
@@ -38,7 +41,7 @@ class MessengerPlatformMessagingService(
                             mapOf(
                                 "questions" to listOf(
                                     mapOf(
-                                        "id" to "hauydmns8",
+                                        "id" to messengerPlatformReviewQuestionId,
                                         "type" to "csat",
                                         "title" to "How would you rate your experience with $businessName",
                                         "score_label" to "neg_pos",

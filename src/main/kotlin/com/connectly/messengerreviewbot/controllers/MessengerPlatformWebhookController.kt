@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam
 class MessengerPlatformWebhookController(
     @Value("\${connectly.messenger-platform.webhook.verify-token}")
     private val messengerPlatformWebhookVerifyToken: String,
+    @Value("\${connectly.messenger-platform.send-api.review-question-id}")
+    private val messengerPlatformReviewQuestionId: String,
     private val businessPageService: BusinessPageService,
     private val customerFeedbackReviewService: CustomerFeedbackReviewService
 ) {
@@ -37,8 +39,8 @@ class MessengerPlatformWebhookController(
                     val businessPageId = messaging.recipient.id
                     businessPageService.getBusinessPageByPageId(businessPageId)?.let { businessPage ->
                         // save the review
-                        val starRating = messaging.messagingFeedback.feedbackScreens.first().questions.get(key = "hauydmns8")?.payload!!.toInt()
-                        val reviewText = messaging.messagingFeedback.feedbackScreens.first().questions.get(key = "hauydmns8")?.followUp?.payload
+                        val starRating = messaging.messagingFeedback.feedbackScreens.first().questions.get(key = messengerPlatformReviewQuestionId)?.payload!!.toInt()
+                        val reviewText = messaging.messagingFeedback.feedbackScreens.first().questions.get(key = messengerPlatformReviewQuestionId)?.followUp?.payload
 
                         customerFeedbackReviewService.createCustomerFeedbackReview(businessPage, reviewText, starRating)
                     } ?: throw Exception("Unable to find this business page by the business page id")
