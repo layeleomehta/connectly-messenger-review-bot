@@ -108,6 +108,9 @@ class MessengerPlatformWebhookController(
                     }
                 }
 
+                // display list of existing products
+                displayExistingProducts(messaging, businessPage)
+
                 // For all other text messages, respond by requesting a quick reply for customer feedback
                 messengerPlatformMessagingService.sendCustomerFeedbackRequestQuickReplyMessage(
                     recipientPsid = messaging.sender.id,
@@ -121,8 +124,23 @@ class MessengerPlatformWebhookController(
         messaging.messagingFeedback?.let { incomingCustomerFeedbackReview ->
             val starRating = incomingCustomerFeedbackReview.feedbackScreens.first().questions.get(key = messengerPlatformReviewQuestionId)?.payload!!.toInt()
             val reviewText = incomingCustomerFeedbackReview.feedbackScreens.first().questions.get(key = messengerPlatformReviewQuestionId)?.followUp?.payload
+            var productRefName: String? = null
 
-            customerFeedbackReviewService.createCustomerFeedbackReview(businessPage, reviewText, starRating).let {
+            val reviewTextAsList = reviewText?.split(" ")
+            val products = messengerPlatformMessagingService.getProducts().map { it.productName }
+
+            products.forEach { productName ->
+                reviewTextAsList?.forEach { currReviewWord ->
+                    if(productName == currReviewWord) productRefName = productName
+                }
+            }
+
+            customerFeedbackReviewService.createCustomerFeedbackReview(
+                businessPage,
+                reviewText,
+                starRating,
+                productRefName
+            ).let {
                 logger.debug("successfully saved customer review into the CustomerFeedbackReview table.")
             }
         }
@@ -139,6 +157,15 @@ class MessengerPlatformWebhookController(
                 )
             }
         }
+    }
+
+    private fun displayExistingProducts(messaging: Messaging, businessPage: BusinessPage) {
+        val products = messengerPlatformMessagingService.getProducts()
+        messengerPlatformMessagingService.sendPlainTextMessage(
+            messaging.sender.id,
+            businessPage,
+            products.map { it.productName }.toString()
+        )
     }
 
 }
