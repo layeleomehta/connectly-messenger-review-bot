@@ -7,21 +7,21 @@ data class IncomingTextMessage(
     val quickReply: QuickReply?,
     val mid: String,
     val text: String,
-    val nlp: Nlp?
+    val nlp: NlpDetails?
 )
 
-data class Nlp(
+data class NlpDetails(
     val traits: Trait
 )
 
 data class Trait(
     @JsonProperty("wit\$greetings")
-    val greeting: List<TraitValue>?,
+    val greeting: List<TraitValues>?,
     @JsonProperty("wit\$bye")
-    val bye: List<TraitValue>?
+    val bye: List<TraitValues>?
 )
 
-data class TraitValue(
+data class TraitValues(
     val value: Boolean,
     val confidence: Double
 )
