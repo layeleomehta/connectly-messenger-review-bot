@@ -89,7 +89,7 @@ class MessengerPlatformMessagingService(
             "recipient" to mapOf("id" to recipientPsid),
             "messaging_type" to "RESPONSE",
             "message" to mapOf(
-                "text" to "Sorry, I didn't quite understand that! Would you like to leave us a review?",
+                "text" to "We're glad you were here! Would you like to leave us a review?",
                 "quick_replies" to listOf(
                     mapOf(
                         "content_type" to "text",
