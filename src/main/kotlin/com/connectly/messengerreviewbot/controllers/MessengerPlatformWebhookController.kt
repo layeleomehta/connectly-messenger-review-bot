@@ -52,6 +52,10 @@ class MessengerPlatformWebhookController(
                             recipientPsid = messaging.sender.id,
                             businessPage = businessPage
                         )
+                    } else if(messaging.message.nlp.traits.greeting != null) {
+                        println("this is a frickin greeting bruh")
+                    } else if(messaging.message.nlp.traits.bye != null) {
+                        println("this is a friicking BYE message bruh")
                     } else {
                         // this is a normal text message; respond by requesting a quick reply
                         messengerPlatformMessagingService.sendQuickReplyMessage(
