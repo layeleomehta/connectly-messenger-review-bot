@@ -1,6 +1,8 @@
 package com.connectly.messengerreviewbot.controllers
 
 import com.connectly.messengerreviewbot.controllers.models.IncomingMessageEvent
+import com.connectly.messengerreviewbot.controllers.models.Messaging
+import com.connectly.messengerreviewbot.database.models.BusinessPage
 import com.connectly.messengerreviewbot.services.BusinessPageService
 import com.connectly.messengerreviewbot.services.CustomerFeedbackReviewService
 import com.connectly.messengerreviewbot.services.MessengerPlatformMessagingService
@@ -43,42 +45,18 @@ class MessengerPlatformWebhookController(
                     ?: throw Exception("Unable to find this business page by the business page id")
 
                 if(messaging.message != null) {
-                    // process an incoming text message. If it's a quick replies payload, request customer review.
-                    if(messaging.message.quickReply != null && messaging.message.quickReply.payload == messengerPlatformPostbackQuickRepliesPayload) {
-                        // this is a quick reply; respond by requesting a customer review
-                        messengerPlatformMessagingService.sendCustomerFeedbackMessage(
-                            recipientPsid = messaging.sender.id,
-                            businessPage = businessPage
-                        )
-                    } else {
-                        // this is a normal text message; respond by requesting a quick reply
-                        messengerPlatformMessagingService.sendQuickReplyMessage(
-                            recipientPsid = messaging.sender.id,
-                            businessPage = businessPage
-                        )
-                    }
+                    // handle quick-reply responses, greetings, farewells and all other text.
+                    handleIncomingTextMessage(messaging, businessPage)
                 }
 
                 if(messaging.messagingFeedback != null) {
                     // process and save a customer's review
-                    val starRating = messaging.messagingFeedback.feedbackScreens.first().questions.get(key = messengerPlatformReviewQuestionId)?.payload!!.toInt()
-                    val reviewText = messaging.messagingFeedback.feedbackScreens.first().questions.get(key = messengerPlatformReviewQuestionId)?.followUp?.payload
-
-                    customerFeedbackReviewService.createCustomerFeedbackReview(businessPage, reviewText, starRating).let {
-                        logger.debug("successfully saved customer review into the CustomerFeedbackReview table.")
-                    }
+                    handleIncomingCustomerFeedbackReview(messaging, businessPage)
                 }
 
                 if(messaging.postback != null) {
                     // process a message postback and request for a customer feedback review:
-                    if(messaging.postback.payload == messengerPlatformPostbackPersistentMenuPayload
-                        || messaging.postback.payload == messengerPlatformPostbackGetStartedPayload
-                    ) {
-                        messengerPlatformMessagingService.sendCustomerFeedbackMessage(
-                            recipientPsid = messaging.sender.id,
-                            businessPage = businessPage
-                        )
-                    }
+                    handleIncomingPersistentMenuResponse(messaging, businessPage)
                 }
             }
         }
@@ -96,6 +74,71 @@ class MessengerPlatformWebhookController(
             if(hubMode == "subscribe" && verifyToken == messengerPlatformWebhookVerifyToken) return ResponseEntity.ok(challenge)
         }
         return ResponseEntity.ok().build()
+    }
+
+    private fun handleIncomingTextMessage(messaging: Messaging, businessPage: BusinessPage) {
+        messaging.message?.let { incomingTextMessage ->
+            if (incomingTextMessage.quickReply != null && incomingTextMessage.quickReply.payload == messengerPlatformPostbackQuickRepliesPayload) {
+                // This is a quick reply; respond by requesting a customer review
+                messengerPlatformMessagingService.sendCustomerFeedbackRequestTemplate(
+                    recipientPsid = messaging.sender.id,
+                    businessPage = businessPage
+                )
+            } else {
+                // This is a text message.
+                incomingTextMessage.nlp.traits.greeting?.first()?.let { traitValues ->
+                    if (traitValues.value && traitValues.confidence > 0.6 && incomingTextMessage.nlp.traits.bye == null) {
+                        // The customer has sent a greeting, send back a greeting text message
+                        messengerPlatformMessagingService.sendPlainTextMessage(
+                            recipientPsid = messaging.sender.id,
+                            businessPage = businessPage,
+                            messageText = "Hey it's so nice to meet you! Please leave us a review if you can."
+                        )
+                    }
+                }
+
+                incomingTextMessage.nlp.traits.bye?.first()?.let { traitValues ->
+                    if (traitValues.value && traitValues.confidence > 0.6 && incomingTextMessage.nlp.traits.greeting == null) {
+                        // The customer has sent a farewell, send back a bye text message
+                        messengerPlatformMessagingService.sendPlainTextMessage(
+                            recipientPsid = messaging.sender.id,
+                            businessPage = businessPage,
+                            messageText = "Bye and come back soon! Please leave us a review if you can."
+                        )
+                    }
+                }
+
+                // For all other text messages, respond by requesting a quick reply for customer feedback
+                messengerPlatformMessagingService.sendCustomerFeedbackRequestQuickReplyMessage(
+                    recipientPsid = messaging.sender.id,
+                    businessPage = businessPage
+                )
+            }
+        }
+    }
+
+    private fun handleIncomingCustomerFeedbackReview(messaging: Messaging, businessPage: BusinessPage) {
+        messaging.messagingFeedback?.let { incomingCustomerFeedbackReview ->
+            val starRating = incomingCustomerFeedbackReview.feedbackScreens.first().questions.get(key = messengerPlatformReviewQuestionId)?.payload!!.toInt()
+            val reviewText = incomingCustomerFeedbackReview.feedbackScreens.first().questions.get(key = messengerPlatformReviewQuestionId)?.followUp?.payload
+
+            customerFeedbackReviewService.createCustomerFeedbackReview(businessPage, reviewText, starRating).let {
+                logger.debug("successfully saved customer review into the CustomerFeedbackReview table.")
+            }
+        }
+    }
+
+    private fun handleIncomingPersistentMenuResponse(messaging: Messaging, businessPage: BusinessPage) {
+        messaging.postback?.let { incomingMessagePostback ->
+            if(incomingMessagePostback.payload == messengerPlatformPostbackPersistentMenuPayload
+                || incomingMessagePostback.payload == messengerPlatformPostbackGetStartedPayload
+            ) {
+                messengerPlatformMessagingService.sendCustomerFeedbackRequestTemplate(
+                    recipientPsid = messaging.sender.id,
+                    businessPage = businessPage
+                )
+            }
+        }
     }
 
 }

@@ -27,7 +27,7 @@ class MessengerPlatformMessagingService(
     private val textEncryptor: TextEncryptor
 ) {
 
-    fun sendCustomerFeedbackMessage(recipientPsid: String, businessPage: BusinessPage): MessageCreationResponse? {
+    fun sendCustomerFeedbackRequestTemplate(recipientPsid: String, businessPage: BusinessPage): MessageCreationResponse? {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
 
@@ -81,7 +81,7 @@ class MessengerPlatformMessagingService(
         }
     }
 
-    fun sendQuickReplyMessage(recipientPsid: String, businessPage: BusinessPage): MessageCreationResponse? {
+    fun sendCustomerFeedbackRequestQuickReplyMessage(recipientPsid: String, businessPage: BusinessPage): MessageCreationResponse? {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
 
@@ -89,7 +89,7 @@ class MessengerPlatformMessagingService(
             "recipient" to mapOf("id" to recipientPsid),
             "messaging_type" to "RESPONSE",
             "message" to mapOf(
-                "text" to "Sorry, I didn't quite understand that! Would you like to leave us a review?",
+                "text" to "We're glad you were here! Would you like to leave us a review?",
                 "quick_replies" to listOf(
                     mapOf(
                         "content_type" to "text",
@@ -97,6 +97,37 @@ class MessengerPlatformMessagingService(
                         "payload" to messengerPlatformPostbackQuickRepliesPayload
                     )
                 )
+            )
+        )
+
+        val requestEntity = HttpEntity(requestBody, headers)
+        return try {
+            restTemplate.exchange(
+                "$messengerPlatformSendApiBaseUrl/$messengerPlatformSendApiVersion/${businessPage.pageId}/messages?access_token=${textEncryptor.decrypt(businessPage.hashedPageAccessToken)}",
+                HttpMethod.POST,
+                requestEntity,
+                MessageCreationResponse::class.java
+            ).body ?: throw Exception("Cannot create message due to an unknown error")
+        } catch (e: ResourceAccessException) {
+            throw Exception("Error connecting to Send API")
+        } catch (e: HttpClientErrorException) {
+            throw Exception("Cannot create message due to invalid inputs")
+        }
+    }
+
+    fun sendPlainTextMessage(
+        recipientPsid: String,
+        businessPage: BusinessPage,
+        messageText: String
+    ): MessageCreationResponse? {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        val requestBody = mapOf(
+            "recipient" to mapOf("id" to recipientPsid),
+            "messaging_type" to "RESPONSE",
+            "message" to mapOf(
+                "text" to messageText
             )
         )
 
