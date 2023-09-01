@@ -7,8 +7,10 @@ Users can register their business page within the backend once they've set up a 
 
 Triggers that a customer can use to make the system request customer feedback: 
 1) Clicking the 'Get Started' button when initially entering chat. 
-2) Clicking 'Leave a review!' in the persistent menu. 
-3) Sending any text message to the business, which will prompt the system to initiate a quick reply message. Clicking 'Yes' to the quick reply message will request customer feedback. 
+2) Clicking 'Leave a review!' in the persistent menu.
+3) Sending a greeting or a farewell text message, which will be parsed by the system using Facebook NLP and initiate a quick reply message. Clicking 'Yes' to the quick reply message will request customer feedback.
+4) Sending any text message to the business, which will prompt the system to initiate a quick reply message. Clicking 'Yes' to the quick reply message will request customer feedback.
+
 
 ## Implementation details
 
