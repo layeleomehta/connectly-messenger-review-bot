@@ -3,6 +3,7 @@ package com.connectly.messengerreviewbot.services
 import com.connectly.messengerreviewbot.database.models.BusinessPage
 import com.connectly.messengerreviewbot.services.models.*
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -143,6 +144,25 @@ class MessengerPlatformMessagingService(
             throw Exception("Error connecting to Send API")
         } catch (e: HttpClientErrorException) {
             throw Exception("Cannot create message due to invalid inputs")
+        }
+    }
+
+    fun getProducts(): List<MockProduct> {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        val requestEntity = HttpEntity(null, headers)
+        return try {
+            restTemplate.exchange(
+                "https://62daf70dd1d97b9e0c49ca5d.mockapi.io/v1/products",
+                HttpMethod.GET,
+                requestEntity,
+                object : ParameterizedTypeReference<List<MockProduct>>() {}
+            ).body ?: throw Exception("Cannot get products due to an unknown error")
+        } catch (e: ResourceAccessException) {
+            throw Exception("Error connecting to Mock API")
+        } catch (e: HttpClientErrorException) {
+            throw Exception("Cannot get products due to invalid inputs")
         }
     }
 

@@ -15,9 +15,10 @@ data class CustomerFeedbackReview(
     @ManyToOne(optional = false)
     @JoinColumn(name = "business_page_id")
     var businessPage: BusinessPage,
-
+    
     var reviewText: String?,
-    var starRating: Int
+    var starRating: Int,
+    var productName: String?
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

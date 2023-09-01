@@ -14,7 +14,8 @@ class CustomerFeedbackReviewService(
     fun createCustomerFeedbackReview(
         businessPage: BusinessPage,
         reviewText: String?,
-        starRating: Int
+        starRating: Int,
+        productName: String?
     ): CustomerFeedbackReview {
         return customerFeedbackReviewRepository.save(
             CustomerFeedbackReview(
@@ -22,7 +23,8 @@ class CustomerFeedbackReviewService(
                 externalId = idGenerator.generateId(),
                 businessPage = businessPage,
                 reviewText = reviewText,
-                starRating = starRating
+                starRating = starRating,
+                productName = productName
             )
         )
     }
