@@ -4,8 +4,6 @@ import com.connectly.messengerreviewbot.controllers.models.IncomingMessageEvent
 import com.connectly.messengerreviewbot.services.BusinessPageService
 import com.connectly.messengerreviewbot.services.CustomerFeedbackReviewService
 import com.connectly.messengerreviewbot.services.MessengerPlatformMessagingService
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
@@ -45,17 +43,17 @@ class MessengerPlatformWebhookController(
                     ?: throw Exception("Unable to find this business page by the business page id")
 
                 if(messaging.message != null) {
-                    // process an incoming text message. If it's a quick replies payload, request customer review.
                     if(messaging.message.quickReply != null && messaging.message.quickReply.payload == messengerPlatformPostbackQuickRepliesPayload) {
                         // this is a quick reply; respond by requesting a customer review
-                        messengerPlatformMessagingService.sendCustomerFeedbackMessage(
+                        messengerPlatformMessagingService.sendCustomerFeedbackRequestTemplate(
                             recipientPsid = messaging.sender.id,
                             businessPage = businessPage
                         )
                     } else {
+                        // this is a text message.
                         messaging.message.nlp.traits.greeting?.first()?.let { traitValues ->
                             if(traitValues.value && traitValues.confidence > 0.6) {
-                                // send a greeting text message
+                                // the customer has sent greeting, send back a greeting text message
                                 messengerPlatformMessagingService.sendPlainTextMessage(
                                     recipientPsid = messaging.sender.id,
                                     businessPage = businessPage,
@@ -66,7 +64,7 @@ class MessengerPlatformWebhookController(
 
                         messaging.message.nlp.traits.bye?.first()?.let { traitValues ->
                             if(traitValues.value && traitValues.confidence > 0.6) {
-                                // send a bye text message
+                                // the customer has sent a farewell, send back a bye text message
                                 messengerPlatformMessagingService.sendPlainTextMessage(
                                     recipientPsid = messaging.sender.id,
                                     businessPage = businessPage,
@@ -75,8 +73,8 @@ class MessengerPlatformWebhookController(
                             }
                         }
 
-                        // this is a normal text message; respond by requesting a quick reply
-                        messengerPlatformMessagingService.sendQuickReplyMessage(
+                        // for all other text messages respond by requesting a quick reply for customer feedback
+                        messengerPlatformMessagingService.sendCustomerFeedbackRequestQuickReplyMessage(
                             recipientPsid = messaging.sender.id,
                             businessPage = businessPage
                         )
@@ -98,7 +96,7 @@ class MessengerPlatformWebhookController(
                     if(messaging.postback.payload == messengerPlatformPostbackPersistentMenuPayload
                         || messaging.postback.payload == messengerPlatformPostbackGetStartedPayload
                     ) {
-                        messengerPlatformMessagingService.sendCustomerFeedbackMessage(
+                        messengerPlatformMessagingService.sendCustomerFeedbackRequestTemplate(
                             recipientPsid = messaging.sender.id,
                             businessPage = businessPage
                         )
@@ -121,5 +119,11 @@ class MessengerPlatformWebhookController(
         }
         return ResponseEntity.ok().build()
     }
+
+    private fun handleIncomingTextMessage() {}
+
+    private fun handleIncomingCustomerFeedbackReview() {}
+
+    private fun handleIncomingPersistentMenuResponse() {}
 
 }

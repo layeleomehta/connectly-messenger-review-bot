@@ -27,7 +27,7 @@ class MessengerPlatformMessagingService(
     private val textEncryptor: TextEncryptor
 ) {
 
-    fun sendCustomerFeedbackMessage(recipientPsid: String, businessPage: BusinessPage): MessageCreationResponse? {
+    fun sendCustomerFeedbackRequestTemplate(recipientPsid: String, businessPage: BusinessPage): MessageCreationResponse? {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
 
@@ -81,7 +81,7 @@ class MessengerPlatformMessagingService(
         }
     }
 
-    fun sendQuickReplyMessage(recipientPsid: String, businessPage: BusinessPage): MessageCreationResponse? {
+    fun sendCustomerFeedbackRequestQuickReplyMessage(recipientPsid: String, businessPage: BusinessPage): MessageCreationResponse? {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
 
